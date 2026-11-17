@@ -1,0 +1,9 @@
+# Never upload local secrets or generated artifacts to Vercel.
+.env
+Backend/.env
+.env.local
+.playwright-mcp/
+
+# Local design-review screenshots and checkpoints
+/*.png
+/checkpoints/

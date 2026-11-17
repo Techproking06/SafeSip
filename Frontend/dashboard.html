@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SafeSip — Analytics Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2306181c'/%3E%3Cpath d='M16 5c-3 4-8 9-8 14a8 8 0 0 0 16 0c0-5-5-10-8-14Z' fill='none' stroke='%2362e0cd' stroke-width='1.6'/%3E%3Cpath d='M10.5 19.5c2 0 3-1.6 5.5-1.6s3.5 1.6 5.5 1.6' fill='none' stroke='%2362e0cd' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <meta name="description" content="SafeSip analytics dashboard: live surveillance tables, a transparent environmental risk model, and nine charts built from Assam water and health data." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+  <script>document.documentElement.classList.add('js');</script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script defer src="analytics.js"></script>
+  <script defer src="scroll-rail.js"></script>
+  <script defer src="script.js"></script>
+</head>
+<body class="dashboard-page" id="top">
+
+  <!-- Shared SafeSip mark: a protected water droplet with two signal waves. -->
+  <svg xmlns="http://www.w3.org/2000/svg" class="svg-sprite" aria-hidden="true" focusable="false">
+    <symbol id="safesip-mark" viewBox="0 0 32 38">
+      <path class="mark-drop" d="M16 1.6C12.4 6.5 4.2 14.3 4.2 23a11.8 11.8 0 0 0 23.6 0C27.8 14.3 19.6 6.5 16 1.6Z" fill="none" stroke="currentColor" stroke-width="1.5" />
+      <circle cx="16" cy="11.4" r="1.55" fill="currentColor" />
+      <path class="mark-wave" d="M8.6 21.8c2.7 0 4-2.2 7.4-2.2s4.7 2.2 7.4 2.2" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+      <path class="mark-wave mark-wave-2" d="M8.6 26.4c2.7 0 4-2.2 7.4-2.2s4.7 2.2 7.4 2.2" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity=".62" />
+    </symbol>
+  </svg>
+
+  <header class="app-bar">
+    <div class="wrap nav-inner">
+      <a class="brand" href="index.html" aria-label="SafeSip home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 38"><use href="#safesip-mark"></use></svg>
+        </span>
+        <span>
+          <span class="brand-name">SafeSip</span>
+          <span class="brand-sub">Water intelligence</span>
+        </span>
+        <span class="brand-divider" aria-hidden="true"></span>
+        <span class="brand-context">Analytics</span>
+      </a>
+
+      <nav class="app-nav" aria-label="Dashboard sections">
+        <a href="#workspace">Workspace</a>
+        <a href="#signals">Environmental signals</a>
+        <a href="#burden">Disease burden</a>
+        <a class="active" href="dashboard.html">Dashboard</a>
+      </nav>
+
+      <div class="nav-actions">
+        <span class="api-pill" id="apiStatus">API live</span>
+        <a class="nav-dashboard" href="index.html">Landing <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </header>
+
+  <main class="dash-main">
+    <section class="dash-intro" aria-labelledby="dash-title">
+      <div class="dash-intro__copy">
+        <p class="eyebrow">Analytics workspace · 2014—2023</p>
+        <h1 class="dash-title" id="dash-title">Water &amp; health<br /><em>risk intelligence.</em></h1>
+        <p class="lede">
+          A working view of Assam’s surveillance record: 2,880 monthly district observations, ten tracked diseases, and a transparent environmental risk model. Every table and chart is produced at request time from the same CSV.
+        </p>
+        <div class="dash-date" aria-label="Dataset scope">
+          <span>Assam, India</span>
+          <span class="sep" aria-hidden="true"></span>
+          <span>6 districts · 24 blocks</span>
+          <span class="sep" aria-hidden="true"></span>
+          <span>No real patient data</span>
+        </div>
+      </div>
+
+      <aside class="provenance" aria-label="Data provenance">
+        <div class="provenance-head">
+          <span>Data provenance</span>
+          <span class="mono">verified at request time</span>
+        </div>
+        <dl>
+          <div>
+            <dt>Dataset</dt>
+            <dd>assam_comprehensive_health_data.csv</dd>
+          </div>
+          <div>
+            <dt>Records</dt>
+            <dd>2,880 rows · 19 columns</dd>
+          </div>
+          <div>
+            <dt>Sources</dt>
+            <dd><code>/api/data</code> · <code>/api/stats</code></dd>
+          </div>
+          <div>
+            <dt>Model</dt>
+            <dd><code>POST /api/predict</code></dd>
+          </div>
+          <div>
+            <dt>Alerts</dt>
+            <dd>Disabled by default</dd>
+          </div>
+          <div>
+            <dt>Status</dt>
+            <dd>Simulated decision support</dd>
+          </div>
+        </dl>
+      </aside>
+    </section>
+
+    <section class="dash-kpis" aria-label="Dataset at a glance">
+      <div class="kpi">
+        <p class="kpi-label">Surveillance records</p>
+        <p class="kpi-value" id="kpiRecords">2,880</p>
+        <p class="kpi-note">Monthly district-level observations.</p>
+      </div>
+      <div class="kpi">
+        <p class="kpi-label">Coverage</p>
+        <p class="kpi-value">
+          <span id="kpiDistricts">6</span><small>districts</small>
+          <span aria-hidden="true" style="color: var(--text-mute);">/</span>
+          <span id="kpiBlocks">24</span><small>blocks</small>
+        </p>
+        <p class="kpi-note">All reported administrative areas.</p>
+      </div>
+      <div class="kpi">
+        <p class="kpi-label">Mean rainfall</p>
+        <p class="kpi-value"><span id="kpiRain">180.7</span><small>mm</small></p>
+        <p class="kpi-note">Average across every surveillance record.</p>
+      </div>
+      <div class="kpi">
+        <p class="kpi-label">Diarrhea cases</p>
+        <p class="kpi-value" id="kpiDiarrhea">123,210</p>
+        <p class="kpi-note">Cumulative ADD cases in the dataset.</p>
+      </div>
+    </section>
+
+    <div id="analyticsFilters" class="analytics-filters" aria-label="Analytics filters"></div>
+
+    <section class="dash-section" id="workspace" aria-labelledby="workspace-title">
+      <div class="dash-section-head">
+        <div>
+          <h2 id="workspace-title">Dataset &amp; risk model</h2>
+          <p>
+            The raw surveillance table and the live environmental rule set, side by side. The model scores rainfall, flood status and stagnant-water risk through the same backend used by the citizen intake.
+          </p>
+        </div>
+        <span class="dash-section-index">01 / workspace</span>
+      </div>
+
+      <div class="dash-workspace">
+        <div class="panel dash-table-panel">
+          <div class="panel-head">
+            <div>
+              <p class="panel-title">Surveillance dataset</p>
+              <p class="panel-caption">All columns, live from <code>/api/data</code>.</p>
+            </div>
+            <p class="panel-meta">assam_comprehensive_health_data.csv<br />2014 — 2023</p>
+          </div>
+
+          <div class="table-shell">
+            <table class="data-table" aria-label="Dataset preview, first 50 records">
+              <thead id="datasetTableHead"></thead>
+              <tbody id="datasetTableBody"></tbody>
+            </table>
+          </div>
+          <p id="datasetError" class="dataset-error hidden" role="alert"></p>
+          <div class="dataset-foot">
+            <span id="datasetRowCount">Showing 50 of 2,880 records</span>
+            <span>Scroll horizontally for all 19 columns →</span>
+          </div>
+        </div>
+
+        <aside class="panel dash-model-panel" aria-label="Environmental risk model">
+          <div class="panel-head">
+            <div>
+              <p class="panel-title">Risk model</p>
+              <p class="panel-caption">Live backend prediction</p>
+            </div>
+            <p class="panel-meta">POST /api/predict</p>
+          </div>
+          <p class="model-intro">
+            Enter conceptual sensor readings. The server applies the transparent rule set and returns a risk score.
+          </p>
+
+          <form id="hardwareRiskForm" class="model-form">
+            <div class="field">
+              <label for="hardwareRainfall">Rainfall (mm)</label>
+              <input class="input" type="number" id="hardwareRainfall" min="0" step="0.1" required placeholder="e.g. 65" />
+            </div>
+            <div class="field-grid">
+              <div class="field">
+                <label for="hardwareFloodStatus">Flood status</label>
+                <div class="select-wrap">
+                  <select class="select" id="hardwareFloodStatus" required>
+                    <option value="">Select</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                  <span class="select-caret" aria-hidden="true"></span>
+                </div>
+              </div>
+              <div class="field">
+                <label for="hardwareStagnantRisk">Stagnant water</label>
+                <div class="select-wrap">
+                  <select class="select" id="hardwareStagnantRisk" required>
+                    <option value="">Select</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                  </select>
+                  <span class="select-caret" aria-hidden="true"></span>
+                </div>
+              </div>
+            </div>
+
+            <button class="btn btn-dark btn-block" type="submit">
+              Predict via backend
+              <span class="btn-icon" aria-hidden="true">↗</span>
+            </button>
+          </form>
+
+          <div id="hardwareResult" class="result-box hidden" role="status">
+            <strong>Risk assessment</strong>
+            <p id="hardwareResultText"></p>
+          </div>
+
+          <div class="model-rules" aria-label="Risk model rules">
+            <span class="rule-chip">rain &gt; 50 mm +2</span>
+            <span class="rule-chip">flood yes +3</span>
+            <span class="rule-chip">stagnant high +2</span>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="dash-section" id="signals" aria-labelledby="signals-title">
+      <div class="dash-section-head">
+        <div>
+          <h2 id="signals-title">Environmental signals</h2>
+          <p>
+            Rainfall, flood exposure and stagnant water are the model’s inputs. Diarrhea is the clearest historical outcome signal in the dataset.
+          </p>
+        </div>
+        <span class="dash-section-index">02 / environmental signals</span>
+      </div>
+
+      <div class="dash-chart-board">
+        <article class="dash-chart">
+          <div class="dash-chart-head">
+            <div>
+              <h3>Rainfall over records</h3>
+              <p>Monthly mean rainfall across the selected records.</p>
+            </div>
+            <span id="rainfallMeta">mm</span>
+          </div>
+          <div class="chart-frame"><canvas id="rainfallChart" role="img" aria-label="Monthly mean rainfall from 2014 to 2023"></canvas></div>
+        </article>
+
+        <article class="dash-chart">
+          <div class="dash-chart-head">
+            <div>
+              <h3>Flood status distribution</h3>
+              <p>Record share by reported flood condition.</p>
+            </div>
+            <span id="floodMeta">records</span>
+          </div>
+          <div class="chart-frame"><canvas id="floodStatusChart" role="img" aria-label="Distribution of records by flood status"></canvas></div>
+        </article>
+
+        <article class="dash-chart">
+          <div class="dash-chart-head">
+            <div>
+              <h3>Stagnant water risk distribution</h3>
+              <p>Record share by stagnant-water risk band.</p>
+            </div>
+            <span id="stagnantMeta">records</span>
+          </div>
+          <div class="chart-frame"><canvas id="stagnantRiskChart" role="img" aria-label="Distribution of records by stagnant water risk"></canvas></div>
+        </article>
+
+        <article class="dash-chart">
+          <div class="dash-chart-head">
+            <div>
+              <h3>Rainfall vs diarrhea cases</h3>
+              <p>One point per district-month observation. Colour marks severe flood records.</p>
+            </div>
+            <span id="scatterMeta">Scatter · all rows</span>
+          </div>
+          <div class="chart-frame"><canvas id="diarrheaScatterChart" role="img" aria-label="Scatter plot of rainfall against diarrhea cases"></canvas></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="dash-section" id="burden" aria-labelledby="burden-title">
+      <div class="dash-section-head">
+        <div>
+          <h2 id="burden-title">Disease burden &amp; geography</h2>
+          <p>
+            All ten disease columns and every administrative area, aggregated from the same records. Rankings make the largest burdens legible first.
+          </p>
+        </div>
+        <span class="dash-section-index">03 / burden &amp; geography</span>
+      </div>
+
+      <div class="dash-chart-board">
+        <article class="dash-chart">
+          <div class="dash-chart-head">
+            <div>
+              <h3>Total cases per disease</h3>
+              <p>Cumulative case count for each tracked disease. Click a bar to focus.</p>
+            </div>
+            <span id="diseaseMeta">All records</span>
+          </div>
+          <div class="chart-frame"><canvas id="diseaseTotalChart" role="img" aria-label="Total cases per disease"></canvas></div>
+        </article>
+
+        <article class="dash-chart">
+          <div class="dash-chart-head">
+            <div>
+              <h3>Top districts by total cases</h3>
+              <p>All-district comparison for the selected disease. Click a bar to filter.</p>
+            </div>
+            <span id="districtMeta">Ranked</span>
+          </div>
+          <div class="chart-frame"><canvas id="districtTotalCasesChart" role="img" aria-label="Districts ranked by total cases"></canvas></div>
+        </article>
+
+        <article class="dash-chart">
+          <div class="dash-chart-head">
+            <div>
+              <h3>Top blocks by total cases</h3>
+              <p>Sub-district burden. Narrows to the selected district automatically.</p>
+            </div>
+            <span id="blockMeta">Top 10</span>
+          </div>
+          <div class="chart-frame"><canvas id="blockTotalCasesChart" role="img" aria-label="Blocks ranked by total cases"></canvas></div>
+        </article>
+
+        <article class="dash-chart">
+          <div class="dash-chart-head">
+            <div>
+              <h3>Geo-type distribution</h3>
+              <p>How observations split across geography types.</p>
+            </div>
+            <span id="geoMeta">Record share</span>
+          </div>
+          <div class="chart-frame"><canvas id="geoTypeChart" role="img" aria-label="Distribution of records by geo type"></canvas></div>
+        </article>
+
+        <article class="dash-chart dash-chart--wide">
+          <div class="dash-chart-head">
+            <div>
+              <h3>Rainfall vs disease burden</h3>
+              <p>Monthly aggregates on a dual axis. Follows the disease focus and district filter.</p>
+            </div>
+            <span id="rainCasesMeta">Monthly aggregate · dual axis</span>
+          </div>
+          <div class="chart-frame"><canvas id="rainfallVsTotalCasesChart" role="img" aria-label="Monthly rainfall versus total disease burden"></canvas></div>
+        </article>
+      </div>
+
+      <p class="dash-note">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M8 1.8 13.5 4v4.3c0 3.2-2.3 5.5-5.5 6.4-3.2-.9-5.5-3.2-5.5-6.4V4L8 1.8Z"/><path d="M8 5.2v3.3M8 10.7v.1"/></svg>
+        <span>
+          This is monthly district-level surveillance data, not live telemetry. Correlations are descriptive, not causal, and the risk model is a transparent rule set for demonstration. Public-health decisions remain with qualified professionals.
+        </span>
+      </p>
+    </section>
+
+  </main>
+
+  <footer class="dash-footer">
+    <div class="wrap dash-footer-meta">
+      <span>© 2026 SafeSip · HackIgnite MITS_HI25_001 · Team ENIGMA DECODERS</span>
+      <span>
+        <a href="mailto:safesip@gmail.com">safesip@gmail.com</a> ·
+        <a href="index.html">Landing page</a> ·
+        <a href="#top">Back to top ↑</a>
+      </span>
+    </div>
+
+    <section class="wordmark" aria-labelledby="signature-title">
+      <div class="wrap">
+        <div class="wordmark-head">
+          <p>End of record / signature</p>
+          <p>SafeSip / water intelligence</p>
+        </div>
+
+        <h2 class="sr-only" id="signature-title">Aditya</h2>
+
+        <div class="wordmark-lockup">
+          <button class="mark-sig" type="button" aria-describedby="sig-tip-dash" aria-label="SafeSip brand mark — water, protection and intelligence. Created by Aditya">
+            <svg viewBox="0 0 32 38" aria-hidden="true"><use href="#safesip-mark"></use></svg>
+            <span class="brandmark-tip" id="sig-tip-dash" role="tooltip">SafeSip mark · created by ADITYA</span>
+          </button>
+
+          <div class="wordmark-type" data-wordmark aria-hidden="true">
+            <span class="wordmark-base">ADITYA</span>
+            <span class="wordmark-fill">ADITYA</span>
+            <span class="wordmark-glow">ADITYA</span>
+          </div>
+        </div>
+
+        <div class="wordmark-foot">
+          <span>MITS Gwalior · HackIgnite</span>
+          <span>SafeSip prototype / vol. 01 — 2026</span>
+        </div>
+      </div>
+    </section>
+  </footer>
+</body>
+</html>

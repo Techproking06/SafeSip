@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Local secrets - never commit these
+.env
+.env.*
+!.env.example
+
+# Vercel
+.vercel/
+
+# Logs and caches
+*.log
+npm-debug.log*
+coverage/
+.cache/
+
+# Build output
+dist/
+build/
+
+# Design-review screenshots and local checkpoints (not site assets)
+/*.png
+/checkpoints/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.playwright-mcp/

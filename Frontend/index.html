@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SafeSip — Water Intelligence for Public Health</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2306181c'/%3E%3Cpath d='M16 5c-3 4-8 9-8 14a8 8 0 0 0 16 0c0-5-5-10-8-14Z' fill='none' stroke='%2362e0cd' stroke-width='1.6'/%3E%3Cpath d='M10.5 19.5c2 0 3-1.6 5.5-1.6s3.5 1.6 5.5 1.6' fill='none' stroke='%2362e0cd' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <meta name="description" content="SafeSip is a water-intelligence and early-warning platform that turns citizen symptom reports, rainfall and water-quality signals into district-level public health action." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+  <script>document.documentElement.classList.add('js');</script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
+  <script defer src="geo-assam.js"></script>
+  <script defer src="analytics.js"></script>
+  <script defer src="hotspot-map.js"></script>
+  <script defer src="scroll-rail.js"></script>
+  <script defer src="sensor-sim.js"></script>
+  <script defer src="sensor-live.js"></script>
+  <script defer src="landing.js"></script>
+</head>
+<body class="landing" id="top">
+
+  <!-- Shared SafeSip mark: a protected water droplet with two signal waves. -->
+  <svg xmlns="http://www.w3.org/2000/svg" class="svg-sprite" aria-hidden="true" focusable="false">
+    <symbol id="safesip-mark" viewBox="0 0 32 38">
+      <path class="mark-drop" d="M16 1.6C12.4 6.5 4.2 14.3 4.2 23a11.8 11.8 0 0 0 23.6 0C27.8 14.3 19.6 6.5 16 1.6Z" fill="none" stroke="currentColor" stroke-width="1.5" />
+      <circle cx="16" cy="11.4" r="1.55" fill="currentColor" />
+      <path class="mark-wave" d="M8.6 21.8c2.7 0 4-2.2 7.4-2.2s4.7 2.2 7.4 2.2" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+      <path class="mark-wave mark-wave-2" d="M8.6 26.4c2.7 0 4-2.2 7.4-2.2s4.7 2.2 7.4 2.2" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" opacity=".62" />
+    </symbol>
+  </svg>
+
+  <header class="site-nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top" aria-label="SafeSip home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 38"><use href="#safesip-mark"></use></svg>
+        </span>
+        <span>
+          <span class="brand-name">SafeSip</span>
+          <span class="brand-sub">Water intelligence</span>
+        </span>
+        <span class="brand-divider" aria-hidden="true"></span>
+        <span class="brand-context">MITS_HI25_001</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Page sections">
+        <a class="nav-link" href="#submit">Report</a>
+        <a class="nav-link" href="#iot">Sensor layer</a>
+        <a class="nav-link" href="#dashboard">Analytics</a>
+        <a class="nav-link" href="#education">Prevention</a>
+        <a class="nav-link" href="#team">Team</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a class="nav-dashboard" href="dashboard.html">Full dashboard <span aria-hidden="true">↗</span></a>
+        <button class="btn btn-primary btn-sm" id="scrollToFormBtn" type="button">
+          Submit report
+          <span class="btn-icon" aria-hidden="true">↗</span>
+        </button>
+        <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Open navigation">
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+    <div class="mobile-menu" id="mobileMenu">
+      <nav class="wrap" aria-label="Mobile navigation">
+        <a href="#submit">Report a signal</a>
+        <a href="#iot">Sensor layer</a>
+        <a href="#dashboard">Analytics workspace</a>
+        <a href="#education">Prevention</a>
+        <a href="#how">How it works</a>
+        <a href="#team">Project team</a>
+        <a href="dashboard.html">Full analytics dashboard ↗</a>
+        <button class="btn btn-primary" id="mobileFormBtn" type="button">Submit report</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- ================= HERO ================= -->
+    <section class="hero-section" id="top" aria-labelledby="hero-title">
+      <div class="wrap">
+        <div class="hero">
+          <div class="hero-copy">
+            <div class="hero-kicker">
+              <span class="dot" aria-hidden="true"></span>
+              <span>Public health early warning</span>
+              <span class="sep" aria-hidden="true">/</span>
+              <span>Assam · 2014—2023 surveillance</span>
+            </div>
+
+            <h1 id="hero-title">
+              Catch water-borne risk <em>before</em> it spreads.
+            </h1>
+
+            <p class="hero-lede">
+              SafeSip turns citizen symptom reports, rainfall and water-quality signals into district-level risk intelligence — so health teams can act in hours, not weeks.
+            </p>
+
+            <div class="hero-actions">
+              <button class="btn btn-primary" id="primaryCtaBtn" type="button">
+                Report a health signal
+                <span class="btn-icon" aria-hidden="true">↗</span>
+              </button>
+              <button class="btn btn-ghost-light" id="dashboardCtaBtn" type="button">
+                Explore the workspace
+                <span class="btn-icon" aria-hidden="true">↓</span>
+              </button>
+              <a class="hero-text-link" href="dashboard.html">Full dashboard <span aria-hidden="true">↗</span></a>
+            </div>
+
+            <div class="hero-note">
+              <span>
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M8 1.8 13 4v4.2c0 3-2.1 5.2-5 6-2.9-.8-5-3-5-6V4l5-2.2Z"/><path d="m5.8 8.1 1.5 1.5 3-3"/></svg>
+                No real patient data stored
+              </span>
+              <span class="sep" aria-hidden="true"></span>
+              <span>Built for HackIgnite · MITS_HI25_001</span>
+              <span class="sep" aria-hidden="true"></span>
+              <span>Alerts off by default</span>
+            </div>
+          </div>
+
+          <aside class="snapshot" aria-label="Live surveillance snapshot">
+            <div class="snapshot-head">
+              <span class="snapshot-title">System snapshot</span>
+              <span class="live-chip" id="heroApiStatus"><span class="dot" aria-hidden="true"></span> API live</span>
+            </div>
+
+            <div class="snapshot-lead">
+              <div>
+                <p class="snapshot-value" id="heroRecords">2,880</p>
+                <p class="snapshot-caption">Surveillance records</p>
+              </div>
+              <p class="snapshot-period">
+                <strong>2014 — 2023</strong>
+                Assam, India
+              </p>
+            </div>
+
+            <div class="snapshot-stats">
+              <div class="snapshot-stat">
+                <span>Mean rainfall</span>
+                <strong><span id="heroAvgRain">180.7</span><small>mm</small></strong>
+              </div>
+              <div class="snapshot-stat">
+                <span>Diarrhea cases</span>
+                <strong id="heroDiarrhea">123,210</strong>
+              </div>
+              <div class="snapshot-stat">
+                <span>Districts</span>
+                <strong><span id="heroDistricts">6</span><small>live</small></strong>
+              </div>
+            </div>
+
+            <div class="snapshot-spark">
+              <div class="spark-head">
+                <span>Monthly rainfall profile</span>
+                <span>mm</span>
+              </div>
+              <div class="rain-bars" id="heroRainBars" aria-hidden="true">
+                <span style="height: 34%"></span><span style="height: 28%"></span><span style="height: 44%"></span>
+                <span style="height: 38%"></span><span style="height: 55%"></span><span style="height: 72%"></span>
+                <span style="height: 88%"></span><span style="height: 64%"></span><span style="height: 49%"></span>
+                <span style="height: 31%"></span><span style="height: 22%"></span><span style="height: 26%"></span>
+              </div>
+            </div>
+
+            <div class="snapshot-foot">
+              <span>Source · assam_comprehensive_health_data.csv</span>
+              <a href="dashboard.html">Full workspace ↗</a>
+            </div>
+          </aside>
+        </div>
+
+        <div class="hero-stats" aria-label="Dataset at a glance">
+          <div class="hero-stat">
+            <strong id="statRecords">2,880</strong>
+            <span>surveillance<br />records</span>
+          </div>
+          <div class="hero-stat">
+            <strong id="statDistricts">6</strong>
+            <span>districts<br />covered</span>
+          </div>
+          <div class="hero-stat">
+            <strong id="statBlocks">24</strong>
+            <span>blocks<br />monitored</span>
+          </div>
+          <div class="hero-stat">
+            <strong id="statDiseases">10</strong>
+            <span>diseases<br />tracked</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CITIZEN INTAKE ================= -->
+    <section class="section section--paper" id="submit" aria-labelledby="submit-title">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="section-head__copy">
+            <p class="eyebrow">01 — Citizen intake</p>
+            <h2 class="display" id="submit-title">Report what you’re seeing.<br /><em>Get a risk read in return.</em></h2>
+            <p class="lede">
+              A simulated intake for citizens and ASHA workers. A short symptom and water-source check returns a transparent, rule-based risk readout — and shows exactly what the alert pipeline attempted.
+            </p>
+          </div>
+          <div class="section-head__aside">
+            <p>
+              No real patient data is stored by this demo. Contact details are posted to <code>/api/send-alert</code> for the duration of the request only; dispatch stays disabled unless the deployment explicitly opts in.
+            </p>
+          </div>
+        </div>
+
+        <div class="intake-grid">
+          <form class="panel form-panel" id="healthForm" novalidate>
+            <div class="field-grid">
+              <div class="field">
+                <label for="name">Full name</label>
+                <input class="input" type="text" id="name" name="name" required autocomplete="name" placeholder="Citizen or patient name" />
+              </div>
+              <div class="field">
+                <label for="age">Age</label>
+                <input class="input" type="number" id="age" name="age" min="0" max="120" required placeholder="Years" />
+              </div>
+            </div>
+
+            <div class="field-grid">
+              <div class="field">
+                <label for="area">Area / village</label>
+                <input class="input" type="text" id="area" name="area" required placeholder="E.g. Kaveri Nagar, Ward 12" />
+              </div>
+              <div class="field">
+                <label for="phone">Phone number</label>
+                <input class="input" type="tel" id="phone" name="phone" required inputmode="tel" pattern="^\+?[0-9]{10,15}$" title="Enter a valid phone number with 10–15 digits (optional leading +)." placeholder="For SMS alerts" />
+              </div>
+            </div>
+
+            <div class="field-grid">
+              <div class="field">
+                <label for="email">Email address <span class="field-hint">optional</span></label>
+                <input class="input" type="email" id="email" name="email" autocomplete="email" placeholder="For email alerts" />
+              </div>
+              <div class="field">
+                <label for="waterSource">Water source</label>
+                <div class="select-wrap">
+                  <select class="select" id="waterSource" name="waterSource" required>
+                    <option value="">Select water source</option>
+                    <option>Municipal Tap</option>
+                    <option>Hand Pump</option>
+                    <option>Borewell</option>
+                    <option>Tanker</option>
+                    <option>River</option>
+                  </select>
+                  <span class="select-caret" aria-hidden="true"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="hygiene">Household &amp; community hygiene</label>
+              <div class="range-field">
+                <div class="range-head">
+                  <span>Rate current hygiene conditions</span>
+                  <strong id="hygieneValue">5 / 10</strong>
+                </div>
+                <input type="range" min="1" max="10" value="5" id="hygiene" name="hygiene" aria-describedby="hygieneHint" />
+                <p class="field-hint" id="hygieneHint">1 = poor · 10 = strong</p>
+              </div>
+            </div>
+
+            <fieldset class="field" style="border:0; padding:0; margin:0;">
+              <legend class="field-label" style="margin-bottom:7px;">Symptoms</legend>
+              <div class="symptom-grid">
+                <label class="symptom"><input type="checkbox" name="symptoms" value="fever" /> Fever</label>
+                <label class="symptom"><input type="checkbox" name="symptoms" value="diarrhea" /> Diarrhea</label>
+                <label class="symptom"><input type="checkbox" name="symptoms" value="vomiting" /> Vomiting</label>
+                <label class="symptom"><input type="checkbox" name="symptoms" value="stomach" /> Stomach pain</label>
+                <label class="symptom"><input type="checkbox" name="symptoms" value="nausea" /> Nausea</label>
+                <label class="symptom"><input type="checkbox" name="symptoms" value="fatigue" /> Fatigue</label>
+              </div>
+            </fieldset>
+
+            <div class="field">
+              <label for="concerns">Water-quality concerns <span class="field-hint">optional</span></label>
+              <textarea class="textarea" id="concerns" name="concerns" rows="3" placeholder="E.g. water looks muddy, smells unusual, visible debris near the hand pump, recent pipeline leak."></textarea>
+            </div>
+
+            <div class="form-foot">
+              <p class="form-disclaimer">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M8 1.8 13.5 4v4.3c0 3.2-2.3 5.5-5.5 6.4-3.2-.9-5.5-3.2-5.5-6.4V4L8 1.8Z"/><path d="M8 5.2v3.3M8 10.7v.1"/></svg>
+                Prototype assessment only. Always consult a qualified medical professional.
+              </p>
+              <button class="btn btn-dark" type="submit">
+                Submit &amp; assess risk
+                <span class="btn-icon" aria-hidden="true">↗</span>
+              </button>
+            </div>
+          </form>
+
+          <aside class="readout" aria-label="Risk readout and alert pipeline">
+            <div class="readout-head">
+              <div>
+                <p class="readout-title">Risk summary · simulated</p>
+                <p class="readout-sub">Updates instantly as a report is assessed.</p>
+              </div>
+              <p class="session">Session<strong id="sessionId">HI25-0001</strong></p>
+            </div>
+
+            <div class="readout-body">
+              <div id="riskCard">
+                <div class="risk-row">
+                  <div class="risk-badge" id="riskBadge">LOW</div>
+                  <div>
+                    <p class="risk-title" id="riskTitle">Awaiting a report.</p>
+                    <p class="risk-subtitle" id="riskSubtitle">Submit a report to generate a transparent risk readout.</p>
+                  </div>
+                </div>
+
+                <div class="risk-metrics">
+                  <div class="risk-metric">
+                    <p class="metric-label">Estimated outbreak risk</p>
+                    <p class="risk-score" id="riskScore">—</p>
+                    <p class="risk-scale">0 = minimal · 1 = confirmed</p>
+                  </div>
+                  <div class="risk-metric">
+                    <p class="metric-label">Contributing factors</p>
+                    <ul class="factor-list" id="riskFactors">
+                      <li>No report submitted in this session.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div class="alert-panel" id="alertSimulation">
+                <div class="alert-head">
+                  <div>
+                    <p class="alert-title">Alert pipeline</p>
+                    <p class="alert-desc">SMS and email dispatch is off by default. The log below records exactly what this page attempted.</p>
+                  </div>
+                  <button class="alert-test" id="testAlertBtn" type="button">Test alert</button>
+                </div>
+
+                <div class="status-row" aria-label="Alert channel status">
+                  <span id="smsStatus" class="status-chip" data-state="idle">SMS · Idle</span>
+                  <span id="emailStatus" class="status-chip" data-state="idle">Email · Idle</span>
+                  <span id="controlStatus" class="status-chip" data-state="idle">Control room · Idle</span>
+                </div>
+
+                <p id="alertStatusText" class="alert-status-text" aria-live="polite">No alerts triggered yet. Submit a report or use the test button.</p>
+
+                <p class="console-label">Payload preview · sent to backend</p>
+                <pre id="alertPreview" class="console-block">{ "status": "idle", "message": "Alert bus standing by" }</pre>
+
+                <p class="console-label">Dispatch log</p>
+                <ul id="alertLogList" class="alert-log">
+                  <li id="alertEmptyState">No alert history yet.</li>
+                </ul>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SENSOR LAYER ================= -->
+    <section class="section section--ink iot-section" id="iot" aria-labelledby="iot-title">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="section-head__copy">
+            <p class="eyebrow">02 — Sensor layer</p>
+            <h2 class="display" id="iot-title">The water tells you <em>first.</em></h2>
+            <p class="lede">
+              In the field, turbidity, pH and dissolved solids shift before cases surface. SafeSip treats those readings as an early signal layer alongside citizen reports.
+            </p>
+          </div>
+          <div class="section-head__aside">
+            <p>
+              This panel is a browser-side simulation derived from a fixed seed. It evolves automatically every few seconds; it is not connected to live field hardware.
+            </p>
+          </div>
+        </div>
+
+        <div class="iot-grid">
+          <div class="sensor-panel">
+            <div class="sensor-panel-head">
+              <p>Source cluster · Kaveri Nagar</p>
+              <span>SIM · KAV-01 / KAV-02</span>
+            </div>
+
+            <div class="sensor-grid">
+              <div class="sensor-card" data-sensor="turbidity" role="button" tabindex="0" aria-pressed="false" aria-label="Isolate turbidity trace">
+                <div class="sensor-head"><span>Turbidity</span><span>NTU</span></div>
+                <div class="sensor-value-row">
+                  <p class="sensor-value" id="turbidityValue">—</p>
+                  <span class="sensor-badge" id="turbidityStatus">Clear</span>
+                </div>
+                <div class="sensor-meter"><span id="turbidityBar" style="width: 0%"></span></div>
+              </div>
+
+              <div class="sensor-card" data-sensor="ph" role="button" tabindex="0" aria-pressed="false" aria-label="Isolate pH trace">
+                <div class="sensor-head"><span>pH level</span><span>0—14</span></div>
+                <div class="sensor-value-row">
+                  <p class="sensor-value" id="phValue">—</p>
+                  <span class="sensor-badge" id="phStatus">Neutral</span>
+                </div>
+                <div class="sensor-meter sensor-meter--blocks" aria-hidden="true" id="phBlocks">
+                  <span></span><span></span><span></span>
+                </div>
+              </div>
+
+              <div class="sensor-card" data-sensor="tds" role="button" tabindex="0" aria-pressed="false" aria-label="Isolate dissolved-solids trace">
+                <div class="sensor-head"><span>Total dissolved solids</span><span>PPM</span></div>
+                <div class="sensor-value-row">
+                  <p class="sensor-value" id="tdsValue">—</p>
+                  <span class="sensor-badge" id="tdsStatus">Within limits</span>
+                </div>
+                <div class="sensor-meter"><span id="tdsGauge" style="width: 0%"></span></div>
+              </div>
+
+              <div class="sensor-card" data-sensor="spike" role="button" tabindex="0" aria-pressed="false" aria-label="Isolate contamination spike summary">
+                <div class="sensor-head"><span>Contamination spikes</span><span>24 h</span></div>
+                <div class="sensor-value-row">
+                  <p class="sensor-value" id="spikeCount">0</p>
+                  <span class="sensor-badge" id="spikeStatus">Stable</span>
+                </div>
+                <div class="sensor-meter sensor-meter--blocks" aria-hidden="true" id="spikeBlocks">
+                  <span></span><span></span><span></span>
+                </div>
+              </div>
+            </div>
+
+            <p class="sensor-note">
+              Production deployments would ingest the same values over MQTT or HTTPS from tanks, borewells and river intake points. SafeSip would learn each source’s local baseline and flag anomalies against it.
+            </p>
+            <p class="sensor-alert" id="sensorAlert" role="status" aria-live="polite">Simulated feed from a fixed seed — not live field telemetry.</p>
+          </div>
+
+          <div class="iot-chart-panel">
+            <div class="iot-chart-head">
+              <div>
+                <p>24-hour water-quality trace</p>
+                <span>Simulated feed · advances every few seconds · click a reading card to isolate its trace.</span>
+              </div>
+              <div class="chart-legend" aria-hidden="true">
+                <span class="legend-aqua"><i></i>Turbidity</span>
+                <span class="legend-green"><i></i>pH</span>
+                <span class="legend-amber"><i></i>TDS</span>
+                <span class="legend-alert"><i></i>Alert level</span>
+              </div>
+            </div>
+
+            <div class="iot-chart-frame">
+              <canvas id="iotChart" role="img" aria-label="Rolling simulated 24-hour turbidity, pH and TDS trace"></canvas>
+              <div class="iot-axis" aria-hidden="true">
+                <span>−24 h</span><span>−18 h</span><span>−12 h</span><span>−6 h</span><span>Now</span>
+              </div>
+            </div>
+
+            <div class="iot-foot">
+              <span>Simulated feed · never live telemetry</span>
+              <div class="sensor-controls">
+                <span class="sensor-clock" id="simClock">Sim --:--</span>
+                <button type="button" class="sensor-btn" id="sensorToggle" aria-pressed="false">Pause</button>
+                <button type="button" class="sensor-btn" id="sensorReset">Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ANALYTICS WORKSPACE ================= -->
+    <section class="section section--paper-2" id="dashboard" aria-labelledby="dashboard-title">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="section-head__copy">
+            <p class="eyebrow">03 — Analytics workspace</p>
+            <h2 class="display" id="dashboard-title">Six districts. Ten diseases.<br /><em>One operating picture.</em></h2>
+            <p class="lede">
+              Every table, chart and prediction below is produced at request time from the surveillance CSV. Nothing is hard-coded, and nothing is hidden behind a mock endpoint.
+            </p>
+          </div>
+          <div class="section-head__aside">
+            <p>
+              <code>/api/data</code> serves all 2,880 records. <code>/api/predict</code> scores rainfall, flood status and stagnant-water risk. Explore the full-resolution workspace for all nine charts.
+            </p>
+            <p style="margin-top: 14px;"><a class="link-arrow" href="dashboard.html">Open full analytics dashboard <span aria-hidden="true">↗</span></a></p>
+          </div>
+        </div>
+
+        <div id="analyticsFilters" class="analytics-filters" aria-label="Analytics filters"></div>
+
+        <div class="workspace-top">
+          <div class="panel dataset-panel">
+            <div class="panel-head">
+              <div>
+                <p class="panel-title">Surveillance dataset</p>
+                <p class="panel-caption">All columns, live from <code>/api/data</code>.</p>
+              </div>
+              <p class="panel-meta">assam_comprehensive_health_data.csv<br />2014 — 2023</p>
+            </div>
+
+            <div class="table-shell">
+              <table class="data-table" aria-label="Dataset preview, first 50 records">
+                <thead id="datasetTableHead"></thead>
+                <tbody id="datasetTableBody"></tbody>
+              </table>
+            </div>
+            <p id="datasetError" class="dataset-error hidden" role="alert"></p>
+            <div class="dataset-foot">
+              <span id="datasetRowCount">Showing 50 of 2,880 records</span>
+              <span>Scroll horizontally for all 19 columns →</span>
+            </div>
+          </div>
+
+          <div class="panel model-panel">
+            <div class="panel-head">
+              <div>
+                <p class="panel-title">Risk model</p>
+                <p class="panel-caption">Live backend prediction</p>
+              </div>
+              <p class="panel-meta">POST /api/predict</p>
+            </div>
+            <p class="model-intro">
+              Enter conceptual sensor readings. The server applies the transparent rule set and returns a risk score.
+            </p>
+
+            <form id="hardwareRiskForm" class="model-form">
+              <div class="field">
+                <label for="hardwareRainfall">Rainfall (mm)</label>
+                <input class="input" type="number" id="hardwareRainfall" min="0" step="0.1" required placeholder="e.g. 65" />
+              </div>
+              <div class="field-grid">
+                <div class="field">
+                  <label for="hardwareFloodStatus">Flood status</label>
+                  <div class="select-wrap">
+                    <select class="select" id="hardwareFloodStatus" required>
+                      <option value="">Select</option>
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
+                    </select>
+                    <span class="select-caret" aria-hidden="true"></span>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="hardwareStagnantRisk">Stagnant water</label>
+                  <div class="select-wrap">
+                    <select class="select" id="hardwareStagnantRisk" required>
+                      <option value="">Select</option>
+                      <option value="High">High</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Low">Low</option>
+                    </select>
+                    <span class="select-caret" aria-hidden="true"></span>
+                  </div>
+                </div>
+              </div>
+
+              <button class="btn btn-dark btn-block" type="submit">
+                Predict via backend
+                <span class="btn-icon" aria-hidden="true">↗</span>
+              </button>
+            </form>
+
+            <div id="hardwareResult" class="result-box hidden" role="status">
+              <strong>Risk assessment</strong>
+              <p id="hardwareResultText"></p>
+            </div>
+
+            <div class="model-rules" aria-label="Risk model rules">
+              <span class="rule-chip">rain &gt; 50 mm +2</span>
+              <span class="rule-chip">flood yes +3</span>
+              <span class="rule-chip">stagnant high +2</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="analytics-bento">
+          <div class="panel map-panel span-7">
+            <div class="panel-head">
+              <div>
+                <p class="panel-title">District risk atlas</p>
+                <p class="panel-caption">Historical burden · <span id="mapPeriod">2014—2023</span> · not live telemetry</p>
+              </div>
+              <p class="panel-meta" id="mapMeta">6 districts</p>
+            </div>
+
+            <div class="map-stage" id="hotspotMap">
+              <div class="map-toolbar">
+                <div class="map-lens" role="group" aria-label="Map risk lens">
+                  <button type="button" data-lens="composite" class="is-active" aria-pressed="true">Composite</button>
+                  <button type="button" data-lens="cases" aria-pressed="false">Cases</button>
+                  <button type="button" data-lens="flood" aria-pressed="false">Flood</button>
+                  <button type="button" data-lens="stagnant" aria-pressed="false">Stagnant</button>
+                </div>
+                <div class="map-zoom" role="group" aria-label="Map zoom controls">
+                  <button type="button" data-zoom="in" aria-label="Zoom in">+</button>
+                  <button type="button" data-zoom="out" aria-label="Zoom out">−</button>
+                  <button type="button" data-zoom="reset" aria-label="Reset map view">⤢</button>
+                </div>
+              </div>
+              <div class="map-empty" hidden>
+                <strong>No districts in this selection</strong>
+                <span>Widen the year range or reset the district filter.</span>
+              </div>
+              <p class="map-hint">Drag to pan · Ctrl + scroll to zoom</p>
+            </div>
+
+            <div class="map-foot">
+              <div class="map-legend-block">
+                <p class="map-legend-title" id="mapLegendTitle">Composite risk index</p>
+                <div class="map-heat-scale" aria-hidden="true">
+                  <span id="mapLegendMin">0</span>
+                  <i><b class="map-heat-tick" id="mapLegendTick"></b></i>
+                  <span id="mapLegendMax">100</span>
+                </div>
+                <p class="map-heat-readout" id="mapLegendReadout" hidden></p>
+              </div>
+              <p class="map-source">Composite of case burden, flood exposure, stagnant-water risk and rainfall. Descriptive, not predictive.</p>
+            </div>
+          </div>
+
+          <div class="panel risk-panel span-5">
+            <div class="panel-head">
+              <div>
+                <p class="panel-title">District burden bands</p>
+                <p class="panel-caption">Composite index · <span id="riskDonutMeta">6 districts</span></p>
+              </div>
+              <p class="panel-meta">Filtered view</p>
+            </div>
+            <div class="donut-wrap donut-wrap--panel">
+              <div class="donut-figure">
+                <canvas id="riskDonutChart" role="img" aria-label="District burden bands for the current filters"></canvas>
+                <div class="donut-center">
+                  <strong id="donutTotal">6</strong>
+                  <span>districts</span>
+                </div>
+              </div>
+              <ul class="donut-legend">
+                <li><span><i class="low"></i>Low band</span><strong id="donutLow">0</strong></li>
+                <li><span><i class="medium"></i>Medium band</span><strong id="donutMedium">0</strong></li>
+                <li><span><i class="high"></i>High band</span><strong id="donutHigh">0</strong></li>
+              </ul>
+            </div>
+            <ul class="district-rank" id="districtRank" aria-label="Districts ranked by composite burden"></ul>
+            <p class="panel-caption">
+              Select a district to filter the charts. The index ranks historical surveillance signals; it is not an outbreak forecast.
+            </p>
+          </div>
+
+          <div class="panel reports-panel span-12">
+            <div class="panel-head">
+              <div>
+                <p class="panel-title">Recently submitted reports</p>
+                <p class="panel-caption">Simulated · newest first</p>
+              </div>
+              <p class="panel-meta">Live session feed</p>
+            </div>
+            <div class="reports-shell">
+              <table class="reports-table">
+                <caption class="sr-only">Simulated citizen reports</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Citizen</th>
+                    <th scope="col">Area</th>
+                    <th scope="col">Source</th>
+                    <th scope="col">Symptoms</th>
+                    <th scope="col">Risk</th>
+                  </tr>
+                </thead>
+                <tbody id="reportsTable"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="mini-stack span-12">
+            <div class="panel mini-chart-panel">
+              <div class="panel-head" style="margin-bottom: 4px;">
+                <p class="panel-title">Monthly case count</p>
+                <p class="panel-meta" id="casesMeta">All diseases</p>
+              </div>
+              <div class="chart-frame">
+                <canvas id="casesChart" role="img" aria-label="Monthly disease case count from the surveillance dataset"></canvas>
+              </div>
+            </div>
+            <div class="panel mini-chart-panel">
+              <div class="panel-head" style="margin-bottom: 4px;">
+                <p class="panel-title">Flood exposure</p>
+                <p class="panel-meta" id="waterTrendMeta">Share of records</p>
+              </div>
+              <div class="chart-frame">
+                <canvas id="waterTrendChart" role="img" aria-label="Monthly share of surveillance records reporting flood exposure"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-board">
+          <div class="chart-card">
+            <div class="chart-card-head">
+              <h3>Total cases per disease</h3>
+              <span id="diseaseMeta">All records</span>
+            </div>
+            <div class="chart-frame"><canvas id="diseaseTotalChart" role="img" aria-label="Total cases per disease"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-head">
+              <h3>Top districts by total cases</h3>
+              <span id="districtMeta">All records</span>
+            </div>
+            <div class="chart-frame"><canvas id="districtTotalCasesChart" role="img" aria-label="Top districts by total cases"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-head">
+              <h3>Top blocks by total cases</h3>
+              <span id="blockMeta">Top 10</span>
+            </div>
+            <div class="chart-frame"><canvas id="blockTotalCasesChart" role="img" aria-label="Top blocks by total cases"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-head">
+              <h3>Geo-type distribution</h3>
+              <span id="geoMeta">Record share</span>
+            </div>
+            <div class="chart-frame"><canvas id="geoTypeChart" role="img" aria-label="Distribution of records by geo type"></canvas></div>
+          </div>
+          <div class="chart-card chart-card--wide">
+            <div class="chart-card-head">
+              <h3>Rainfall vs disease burden</h3>
+              <span id="rainCasesMeta">Monthly aggregate · dual axis</span>
+            </div>
+            <div class="chart-frame"><canvas id="rainfallVsTotalCasesChart" role="img" aria-label="Rainfall versus total disease burden over time"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PREVENTION ================= -->
+    <section class="section section--paper" id="education" aria-labelledby="education-title">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="section-head__copy">
+            <p class="eyebrow">04 — Field guidance</p>
+            <h2 class="display" id="education-title">Prevention is the <em>first</em> early warning.</h2>
+            <p class="lede">
+              Simple, evidence-based practice stops transmission before a cluster forms. These guidelines synthesise WHO recommendations and Indian public-health advisories.
+            </p>
+          </div>
+          <div class="section-head__aside">
+            <p>
+              SafeSip can surface this guidance contextually when a locality’s risk score rises, turning an alert into an immediate, practical next step.
+            </p>
+          </div>
+        </div>
+
+        <div class="prevention-grid">
+          <article class="prevention">
+            <span class="prevention-index">01</span>
+            <span class="prevention-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 3c-2.8 3.7-7 7.7-7 11.7a7 7 0 0 0 14 0C19 10.7 14.8 6.7 12 3Z"/><path d="M8.5 14.5c1.5 0 2.2-1.2 3.5-1.2s2 1.2 3.5 1.2"/></svg>
+            </span>
+            <h3>Clean water practices</h3>
+            <ul>
+              <li>Boil water for at least 3 minutes before drinking.</li>
+              <li>Use WHO-recommended filtration or chlorination where boiling is not possible.</li>
+              <li>Store drinking water in covered, clean containers with narrow mouths.</li>
+              <li>Never dip hands or used cups directly into storage containers.</li>
+            </ul>
+            <p class="prevention-source">Source · WHO WASH guidelines</p>
+          </article>
+
+          <article class="prevention">
+            <span class="prevention-index">02</span>
+            <span class="prevention-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M7 12V6.5a1.5 1.5 0 0 1 3 0V11"/><path d="M10 10.5V5a1.5 1.5 0 0 1 3 0v5.5"/><path d="M13 10.5V6a1.5 1.5 0 0 1 3 0v7"/><path d="M16 10.5V8a1.5 1.5 0 0 1 3 0v6.5A7.5 7.5 0 0 1 11.5 22h-1a6 6 0 0 1-5.3-3.2L3 14.5a1.7 1.7 0 0 1 2.9-1.7L7 14.5"/></svg>
+            </span>
+            <h3>Hygiene &amp; sanitation</h3>
+            <ul>
+              <li>Wash hands with soap for at least 20 seconds before eating and after using the toilet.</li>
+              <li>Keep toilets and surroundings clean and dry to discourage flies.</li>
+              <li>Dispose of children’s faeces safely — never in open drains or near water sources.</li>
+              <li>Discourage open defecation through community-led campaigns.</li>
+            </ul>
+            <p class="prevention-source">Aligned with Swachh Bharat Mission</p>
+          </article>
+
+          <article class="prevention">
+            <span class="prevention-index">03</span>
+            <span class="prevention-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 21s7-3.4 7-9V5.5L12 3 5 5.5V12c0 5.6 7 9 7 9Z"/><path d="M12 8v4.5M12 15.5v.1"/></svg>
+            </span>
+            <h3>When to seek medical help</h3>
+            <ul>
+              <li>Persistent diarrhea — more than 3 loose stools in 24 hours.</li>
+              <li>Signs of dehydration: extreme thirst, infrequent urination, dizziness.</li>
+              <li>High fever, blood in stool, or vomiting that does not settle.</li>
+              <li>Infants, pregnant women and older adults should seek care early.</li>
+            </ul>
+            <p class="prevention-source">Consult the nearest PHC or government hospital</p>
+          </article>
+
+          <article class="prevention">
+            <span class="prevention-index">04</span>
+            <span class="prevention-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M5 4.5h9a3 3 0 0 1 3 3V21H8a3 3 0 0 1-3-3V4.5Z"/><path d="M17 8.5h2v9.5a3 3 0 0 1-3 3"/><path d="M8.5 8.5h5M8.5 12h5M8.5 15.5h3"/></svg>
+            </span>
+            <h3>Government &amp; WHO guidance</h3>
+            <ul>
+              <li>Follow local boil-water advisories and public-health orders.</li>
+              <li>Participate in mass chlorination or vaccination drives when announced.</li>
+              <li>Report suspected outbreaks to ASHA or ANM workers promptly.</li>
+              <li>Use community reporting platforms to shorten the signal-to-response gap.</li>
+            </ul>
+            <p class="prevention-source">Integrates with state health communication</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= HOW IT WORKS ================= -->
+    <section class="section section--paper-2" id="how" aria-labelledby="how-title">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="section-head__copy">
+            <p class="eyebrow">05 — How it works</p>
+            <h2 class="display" id="how-title">From one report to a <em>coordinated response.</em></h2>
+          </div>
+          <div class="section-head__aside">
+            <p>SafeSip does not replace field teams. It shortens the distance between what a community sees and what a health system can act on.</p>
+          </div>
+        </div>
+
+        <div class="steps-grid">
+          <div class="step">
+            <span class="step-number" aria-hidden="true">01</span>
+            <h3>Citizens submit symptoms</h3>
+            <p>ASHA workers and citizens log basic health information, symptoms and water concerns from mobile, kiosk or offline-first tools.</p>
+          </div>
+          <div class="step">
+            <span class="step-number" aria-hidden="true">02</span>
+            <h3>Water and context collected</h3>
+            <p>Water-quality sensors stream turbidity, pH and TDS. Field staff add rainfall, repairs and sanitation context.</p>
+          </div>
+          <div class="step">
+            <span class="step-number" aria-hidden="true">03</span>
+            <h3>Risk engine detects a pattern</h3>
+            <p>A transparent rule set correlates environmental signals and symptom density to score each area in near real time.</p>
+          </div>
+          <div class="step">
+            <span class="step-number" aria-hidden="true">04</span>
+            <h3>Responders get a signal</h3>
+            <p>District officers and PHCs see prioritised hotspots, maps and recommended actions. Demo alerts remain off by default.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TEAM ================= -->
+    <section class="section section--paper" id="team" aria-labelledby="team-title">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="section-head__copy">
+            <p class="eyebrow">06 — Project team</p>
+            <h2 class="display" id="team-title">The people behind <em>ENIGMA DECODERS.</em></h2>
+            <p class="lede">A multidisciplinary crew spanning engineering, design, research and production — aligned on delivering trustworthy, human-centred public-health technology.</p>
+          </div>
+          <div class="section-head__aside">
+            <p>Built for HackIgnite · MITS_HI25_001. The platform is a prototype; public-health decisions remain with qualified professionals.</p>
+          </div>
+        </div>
+
+        <div class="team-grid">
+          <article class="person">
+            <div class="person-top">
+              <span class="person-monogram" aria-hidden="true">A</span>
+              <span class="person-index">01</span>
+            </div>
+            <h3>Amrit</h3>
+            <p class="person-role">Development &amp; coding · Speech &amp; delivery · Research</p>
+            <p class="person-bio">Engineering lead ensuring the build stays robust, storytelling is sharp, and every feature lands with evidence-backed research.</p>
+            <div class="person-tags"><span>Development</span><span>Speech</span><span>Research</span></div>
+          </article>
+
+          <article class="person">
+            <div class="person-top">
+              <span class="person-monogram" aria-hidden="true">A</span>
+              <span class="person-index">02</span>
+            </div>
+            <h3>Aditya</h3>
+            <p class="person-role">Lead developer · Full stack · Research</p>
+            <p class="person-bio">Architected the complete platform end-to-end and led the data narrative that powers the submission.</p>
+            <div class="person-tags"><span>Full stack</span><span>Integrations</span><span>Research</span></div>
+          </article>
+
+          <article class="person">
+            <div class="person-top">
+              <span class="person-monogram" aria-hidden="true">D</span>
+              <span class="person-index">03</span>
+            </div>
+            <h3>Disha</h3>
+            <p class="person-role">Development &amp; coding · Research · Speech</p>
+            <p class="person-bio">Translates field learnings into resilient code and keeps the presentation crisp for juries and stakeholders.</p>
+            <div class="person-tags"><span>Development</span><span>Research</span><span>Speech</span></div>
+          </article>
+
+          <article class="person">
+            <div class="person-top">
+              <span class="person-monogram" aria-hidden="true">A</span>
+              <span class="person-index">04</span>
+            </div>
+            <h3>Aryaman</h3>
+            <p class="person-role">Presentation design</p>
+            <p class="person-bio">Crafts the jury-facing storyline, turning complex systems into visually compelling narratives.</p>
+            <div class="person-tags"><span>Deck design</span><span>Visual story</span></div>
+          </article>
+
+          <article class="person">
+            <div class="person-top">
+              <span class="person-monogram" aria-hidden="true">A</span>
+              <span class="person-index">05</span>
+            </div>
+            <h3>Anirudh</h3>
+            <p class="person-role">Video generation</p>
+            <p class="person-bio">Produces cinematic walkthroughs that weave UI captures, footage and voiceovers into compelling submission films.</p>
+            <div class="person-tags"><span>Production</span><span>Storyboarding</span></div>
+          </article>
+
+          <article class="person">
+            <div class="person-top">
+              <span class="person-monogram" aria-hidden="true">S</span>
+              <span class="person-index">06</span>
+            </div>
+            <h3>Shreyas</h3>
+            <p class="person-role">Graphic design</p>
+            <p class="person-bio">Defines the visual system — iconography, typography and consistent branding across every screen.</p>
+            <div class="person-tags"><span>Brand systems</span><span>Graphic design</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-main">
+        <div class="footer-brand">
+          <a class="brand" href="#top" aria-label="SafeSip home">
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 32 38"><use href="#safesip-mark"></use></svg>
+            </span>
+            <span>
+              <span class="brand-name">SafeSip</span>
+              <span class="brand-sub">Water intelligence</span>
+            </span>
+          </a>
+          <p>
+            A public-health early-warning prototype for water-borne disease risk. Citizen reports, environmental signals and district surveillance data in one clear operating picture.
+          </p>
+        </div>
+
+        <div>
+          <p class="footer-heading">Explore</p>
+          <nav class="footer-links" aria-label="Footer navigation">
+            <a href="#submit">Citizen intake</a>
+            <a href="#iot">Sensor layer</a>
+            <a href="#dashboard">Analytics workspace</a>
+            <a href="dashboard.html">Full dashboard</a>
+            <a href="#team">Project team</a>
+          </nav>
+        </div>
+
+        <div class="footer-contact-block">
+          <p class="footer-heading">Contact &amp; credit</p>
+          <p class="footer-contact">
+            <a href="mailto:safesip@gmail.com">safesip@gmail.com</a><br />
+            HackIgnite · MITS_HI25_001<br />
+            Team ENIGMA DECODERS
+          </p>
+          <span class="footer-credit">Prototype UI for national-level hackathon evaluation. Data, flows and visualisations are simulated for demonstration.</span>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div class="footer-legal">
+          <span>© 2026 SafeSip</span>
+          <span class="sep" aria-hidden="true"></span>
+          <span>No real patient data stored</span>
+          <span class="sep" aria-hidden="true"></span>
+          <span>Alerts disabled by default</span>
+        </div>
+        <a class="footer-to-top" href="#top">Back to top ↑</a>
+      </div>
+    </div>
+
+    <section class="wordmark" aria-labelledby="signature-title">
+      <div class="wrap">
+        <div class="wordmark-head">
+          <p>End of record / signature</p>
+          <p>SafeSip / water intelligence</p>
+        </div>
+
+        <h2 class="sr-only" id="signature-title">Aditya</h2>
+
+        <div class="wordmark-lockup">
+          <button class="mark-sig" type="button" aria-describedby="sig-tip-index" aria-label="SafeSip brand mark — water, protection and intelligence. Created by Aditya">
+            <svg viewBox="0 0 32 38" aria-hidden="true"><use href="#safesip-mark"></use></svg>
+            <span class="brandmark-tip" id="sig-tip-index" role="tooltip">SafeSip mark · created by ADITYA</span>
+          </button>
+
+          <div class="wordmark-type" data-wordmark aria-hidden="true">
+            <span class="wordmark-base">ADITYA</span>
+            <span class="wordmark-fill">ADITYA</span>
+            <span class="wordmark-glow">ADITYA</span>
+          </div>
+        </div>
+
+        <div class="wordmark-foot">
+          <span>MITS Gwalior · HackIgnite</span>
+          <span>SafeSip prototype / vol. 01 — 2026</span>
+        </div>
+      </div>
+    </section>
+  </footer>
+
+</body>
+</html>
